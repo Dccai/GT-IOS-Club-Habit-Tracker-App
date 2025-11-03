@@ -1,23 +1,30 @@
-//
-//  ContentView.swift
-//  IOS Habit Tracker App Project
-//
-//  Created by user940897 on 11/3/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var userViewModel = UserViewModel()
+    @State private var showLogin = false
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack{
+            VStack(spacing: 20) {
+                if let user = userViewModel.user {
+                    Text("Hello, \(user.name)")
+                    
+                } else {
+                    Text("Welcome! Please login to the app to use it.")
+                }
+                Button("Login") {
+                    showLogin = true
+                }
+            }
+            .navigationDestination(isPresented: $showLogin){LoginView()}
+            .task{
+                await userViewModel.fetchUser()
+            }
+            .padding(10)
         }
-        .padding()
     }
 }
+
 
 #Preview {
     ContentView()
