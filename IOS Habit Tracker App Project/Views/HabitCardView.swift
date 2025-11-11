@@ -1,3 +1,4 @@
+
 //
 //  HabitCardView.swift
 //  habit tracker
@@ -6,25 +7,30 @@
 //
 import SwiftUI
 
-let placeholderHabit = Habit(
-    name: "Drink Water",
-    label: "💧",
-    hex: "4EABF3",
-    progress: 5,
-    goal: 104,
-    unit: "OZ"
+let sampleHabit = Habit(
+    name: "Call Family",
+    label: "📞",
+    progress: 0,
+    colorIndex: 1,
+    goal: 1,
+    unit: "time",
+    startDate: .now,
+    repeatRule: .daily,
+    isWeekly: false
 )
-
 
 struct HabitCardView: View {
     var displayInfo: Habit
+    var onLog: () -> Void = {}
+    var onEdit: () -> Void = {}
+    var onDelete: () -> Void = {}
     
     var body: some View {
             HStack(spacing: 10){
                 VStack{
                     HStack{
                         ZStack{
-                            Circle().fill(displayInfo.color.opacity(0.4))
+                            Circle().fill(colors[displayInfo.colorIndex].opacity(0.4))
                             Text(displayInfo.label)
                         }.frame(width: 48, height: 48)
                             VStack(alignment: .leading){
@@ -38,21 +44,37 @@ struct HabitCardView: View {
                                 }
                             }
                             Spacer()
-                            NavigationLink {} label: {
-                                HStack(spacing: 2){
-                                    Image(systemName: "plus")
-                                    Text("Log")
-                                }.foregroundStyle(.white)
-                                    .font(.system(size: 12))
-                                    .padding(.horizontal, 12).padding(.vertical, 6)
-                                    .background(Color.blue)
-                                    .clipShape(Capsule())
-                            }
+                            Button(action: onLog) {
+                                                HStack(spacing: 2) {
+                                                    Image(systemName: "plus")
+                                                    Text("Log")
+                                                }
+                                                .foregroundStyle(.white)
+                                                .font(.system(size: 12))
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 6)
+                                                .background(Color.blue)
+                                                .clipShape(Capsule())
+                                            }
+                                            .buttonStyle(.plain)
+                        
                     }
-                    Divider().padding(.leading, 58).padding(.trailing, -16)
                 }
-            }.padding(.horizontal, 16).padding(.top, 24)
+            }.padding(.vertical, 12).contentShape(Rectangle()).swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        onDelete()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .tint(.red)
+                    Button {
+                        onEdit()
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                    }
+                    .tint(.orange)
+            }
     }
 }
 
-#Preview { HabitCardView(displayInfo: placeholderHabit) }
+#Preview { HabitCardView(displayInfo: sampleHabit) }
