@@ -1,127 +1,146 @@
 import SwiftUI
-
-let sampleHabits: [Habit] = {
-    let calendar = Calendar.current
-    let today = Date()
-    
-    let yesterday = calendar.date(byAdding: .day, value: -1, to: today) ?? today
-    let twoDaysAgo = calendar.date(byAdding: .day, value: -2, to: today) ?? today
-    let lastWeek = calendar.date(byAdding: .day, value: -7, to: today) ?? today
-    
-    return [
-        Habit(
-            name: "Drink Water",
-            label: "💧",
-            progress: 32,
-            colorIndex: 4,
-            goal: 80,
-            unit: "oz",
-            startDate: today,
-            repeatRule: .daily,
-            isWeekly: false
-        ),
-        Habit(
-            name: "Drink Water",
-            label: "💧",
-            progress: 32,
-            colorIndex: 1,
-            goal: 80,
-            unit: "oz",
-            startDate: today,
-            repeatRule: .daily,
-            isWeekly: false
-        ),
-        Habit(
-            name: "Drink Water",
-            label: "💧",
-            progress: 32,
-            colorIndex: 1,
-            goal: 80,
-            unit: "oz",
-            startDate: today,
-            repeatRule: .daily,
-            isWeekly: false
-        ),
-        Habit(
-            name: "Drink Water",
-            label: "💧",
-            progress: 32,
-            colorIndex: 1,
-            goal: 80,
-            unit: "oz",
-            startDate: today,
-            repeatRule: .daily,
-            isWeekly: false
-        )
-    ]
-}()
+import Foundation
 
 struct HabitLogView: View {
     @Environment(\.calendar) private var calendar
     @State private var selectedDate = Date()
-    private let habits = sampleHabits
-    
+    @State private var selectedHabitForLog: Habit?
+    @State private var selectedHabitForEdit: Habit?
+    @State private var showNewHabitSheet = false
+    @State private var habits = sampleHabits
+    private let cardApproxHeight: CGFloat = 107
+    private let maxVisibleDailyCards = 3
+    private let maxVisibleWeeklyCards = 2
+
     var body: some View {
-            VStack(alignment: .leading, spacing: 12){
-                HStack{
-                    Spacer()
-                    NavigationLink {
-                    } label: {
-                        Image(systemName: "plus")
-                            .imageScale(.large)
-                            .foregroundColor(.blue)
-                    }
-                    .buttonStyle(.plain).padding(.bottom, 14)
-                }
+        VStack(alignment: .leading, spacing: 12) {
 
-                Text("Habits").font(.system(size: 34, weight: .bold))
-                DateSelector(selectedDate: $selectedDate).padding(.horizontal, -16)
-                List {
-                    Section(
-                        header: Text("DAILY (\(dailyHabitsForSelectedDate.count))").foregroundStyle(.black)
-                            .font(.system(size: 12, weight: .medium)).padding(.bottom, -16)){
-                        if dailyHabitsForSelectedDate.isEmpty {
-                            HStack {
-                                Spacer()
-                                Text("No habits")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                            .listRowSeparator(.hidden)
-                        } else {
-                            ForEach(dailyHabitsForSelectedDate) { habit in
-                                HabitCardView(displayInfo: habit)
-                            }
+            HStack {
+                Spacer()
+                Button {
+                    showNewHabitSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .imageScale(.large)
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 14)
+            }
+
+            Text("Habits")
+                .font(.system(size: 34, weight: .bold))
+
+            DateSelector(selectedDate: $selectedDate)
+                .padding(.horizontal, -16)
+
+            List {
+                // DAILY
+                Section(
+                    header:
+                        Text("DAILY (\(dailyHabitsForSelectedDate.count))")
+                            .foregroundStyle(.black)
+                            .font(.system(size: 12, weight: .medium))
+                ) {
+                    if dailyHabitsForSelectedDate.isEmpty {
+                        HStack {
+                            Spacer()
+                            Text("No habits")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .listRowSeparator(.hidden)
+                    } else {
+                        ForEach(dailyHabitsForSelectedDate) { habit in
+                            HabitCardView(
+                                displayInfo: habit,
+                                onLog: {
+                                    selectedHabitForLog = habit
+                                },
+                                onEdit: {
+                                    selectedHabitForEdit = habit
+                                },
+                                onDelete: {
+                                    if let index = habits.firstIndex(where: { $0.id == habit.id }) {
+                                        habits.remove(at: index)
+                                    }
+                                }
+                            )
                         }
                     }
-                    
-                    Section(
-                        header: Text("WEEKLY (\(weeklyHabitsForSelectedDate.count))").foregroundStyle(.black)
-                            .font(.system(size: 12, weight: .medium)).padding(.vertical, -16)){
-                        if weeklyHabitsForSelectedDate.isEmpty {
-                            HStack {
-                                Spacer()
-                                Text("No habits")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                            .listRowSeparator(.hidden)
-                        } else {
-                            ForEach(weeklyHabitsForSelectedDate) { habit in
-                                HabitCardView(displayInfo: habit)
-                            }
+                }
+                // weekly stuff
+                Section(
+                    header:
+                        Text("WEEKLY (\(weeklyHabitsForSelectedDate.count))")
+                            .foregroundStyle(.black)
+                            .font(.system(size: 12, weight: .medium))
+                            .padding(.top, -16)
+                ) {
+                    if weeklyHabitsForSelectedDate.isEmpty {
+                        HStack {
+                            Spacer()
+                            Text("No habits")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .listRowSeparator(.hidden)
+                    } else {
+                        ForEach(weeklyHabitsForSelectedDate) { habit in
+                            HabitCardView(
+                                displayInfo: habit,
+                                onLog: {
+                                    selectedHabitForLog = habit
+                                },
+                                onEdit: {
+                                    selectedHabitForEdit = habit
+                                },
+                                onDelete: {
+                                    if let index = habits.firstIndex(where: { $0.id == habit.id }) {
+                                        habits.remove(at: index)
+                                    }
+                                }
+                            )
                         }
                     }
-
                 }
-                .listStyle(.plain)
-                .padding(.horizontal, -16).padding(.top, -24)
-            }.frame(alignment: .topLeading).padding(.horizontal, 16)
-    
+            }
+            .listStyle(.plain)
+            .padding(.horizontal, -16)
+            .padding(.top, -24)
+        }
+        .frame(alignment: .topLeading)
+        .padding(.horizontal, 16)
+        // habit log sheet stuff
+        .sheet(item: $selectedHabitForLog) { habit in
+            HabitLogSheet(habit: habit) { newProgress in
+                if let index = habits.firstIndex(where: { $0.id == habit.id }) {
+                    habits[index].progress = newProgress
+                }
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        // edit habit sheet stuff
+        .sheet(item: $selectedHabitForEdit) { habit in
+            NavigationStack {
+                EditHabitView(habit: habit) { updatedHabit in
+                    if let index = habits.firstIndex(where: { $0.id == updatedHabit.id }) {
+                        habits[index] = updatedHabit
+                    }
+                }
+            }
+        }
+        // new habit sheet stuff
+        .sheet(isPresented: $showNewHabitSheet) {
+            NewHabitView { newHabit in
+                habits.append(newHabit)
+                selectedDate = Date() // Reset to today so you see the new habit
+            }
+        }
     }
-    
+
+    // filtering
 
     private var dailyHabitsForSelectedDate: [Habit] {
         habits.filter { habit in
@@ -132,10 +151,35 @@ struct HabitLogView: View {
 
     private var weeklyHabitsForSelectedDate: [Habit] {
         habits.filter { habit in
-            habit.isWeekly
-            && calendar.isDate(selectedDate,equalTo: habit.startDate,toGranularity: .weekOfYear)
+            guard habit.isWeekly else { return false }
+            guard selectedDate >= calendar.startOfDay(for: habit.startDate) else {
+                return false
+            }
+            let selectedWeekStart = calendar.startOfWeek(containing: selectedDate)
+            let habitWeekStart = calendar.startOfWeek(containing: habit.startDate)
+            return selectedWeekStart >= habitWeekStart
         }
+    }
+
+    private var dailyListHeight: CGFloat {
+        heightForList(count: dailyHabitsForSelectedDate.count,
+                      maxVisible: maxVisibleDailyCards)
+    }
+
+    private var weeklyListHeight: CGFloat {
+        heightForList(count: weeklyHabitsForSelectedDate.count,
+                      maxVisible: maxVisibleWeeklyCards)
+    }
+
+    private func heightForList(count: Int, maxVisible: Int) -> CGFloat {
+        guard count > 0 else { return 150 }
+        let visibleRows = min(count, maxVisible)
+        return CGFloat(visibleRows) * cardApproxHeight
     }
 }
 
-#Preview { HabitLogView() }
+#Preview {
+    NavigationStack {
+        HabitLogView()
+    }
+}

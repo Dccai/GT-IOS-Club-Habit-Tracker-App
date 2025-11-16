@@ -1,3 +1,4 @@
+
 //
 //  StatCardView.swift
 //  habit tracker
@@ -33,4 +34,5 @@ struct StatCardView: View {
     }
 }
 
-#Preview { StatCardView(displayInfo: sampleHabit) }
+#Preview { StatCardView(displayInfo: sampleHabits[0]) }
+

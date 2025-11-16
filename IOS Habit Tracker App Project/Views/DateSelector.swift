@@ -1,11 +1,6 @@
-//
-//  DateSelector.swift
-//  habit tracker
-//
-//  Created by Nathan Bai on 11/7/25.
-//
-
+import Foundation
 import SwiftUI
+
 
 struct DateSelector: View {
     @Environment(\.calendar) private var calendar
@@ -175,7 +170,6 @@ private struct WeekStrip: View {
     }
 }
 
-
 extension Calendar {
     func startOfWeek(containing day: Date) -> Date {
         dateInterval(of: .weekOfYear, for: day)?.start ?? startOfDay(for: day)
@@ -183,3 +177,23 @@ extension Calendar {
 }
 
 
+#Preview {
+    struct PreviewWrapper: View {
+        @State private var selectedDate = Date()
+        
+        var body: some View {
+            VStack {
+                DateSelector(selectedDate: $selectedDate)
+                
+                Spacer()
+                
+                Text("Selected: \(selectedDate.formatted(date: .long, time: .omitted))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding()
+            }
+        }
+    }
+    
+    return PreviewWrapper()
+}

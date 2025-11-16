@@ -1,15 +1,7 @@
-//
-//  Habit.swift
-//  habit tracker
-//
-//  Created by Nathan Bai on 10/30/25.
-//
-
 import Foundation
 import SwiftUI
 
 enum HabitRepeat: Equatable {
-    case oneTime
     case daily
     case weekdays
     case weekends
@@ -25,7 +17,7 @@ struct Habit: Identifiable {
     var id: UUID = UUID()
     
     var name: String
-    var label: String //emoji
+    var label: String
     var progress: Int
     var colorIndex: Int
     var goal: Int
@@ -46,9 +38,6 @@ extension Habit {
         let startWeekday = calendar.component(.weekday, from: startDate)
         
         switch repeatRule {
-        case .oneTime:
-            return calendar.isDate(date, inSameDayAs: startDate)
-            
         case .daily:
             return true
             
@@ -71,18 +60,68 @@ extension Habit {
 }
 
 let colors: [Color] = [
-        Color(red: 1.0, green: 0.6, blue: 0.6),
-        Color(red: 1.0, green: 0.8, blue: 0.5),
-        Color(red: 1.0, green: 0.95, blue: 0.5),
-        Color(red: 0.6, green: 0.9, blue: 0.6),
-        Color(red: 0.6, green: 0.85, blue: 0.95),
-        Color(red: 0.6, green: 0.7, blue: 0.95),
-        Color(red: 0.7, green: 0.6, blue: 0.95),
-        Color(red: 1.0, green: 0.7, blue: 0.8),
-        Color(red: 0.85, green: 0.6, blue: 0.95),
-        Color(red: 0.75, green: 0.7, blue: 0.65),
-        Color(red: 0.7, green: 0.7, blue: 0.7),
-        Color(red: 0.9, green: 0.85, blue: 0.85)
+    Color(red: 1.0, green: 0.6, blue: 0.6),
+    Color(red: 1.0, green: 0.8, blue: 0.5),
+    Color(red: 1.0, green: 0.95, blue: 0.5),
+    Color(red: 0.6, green: 0.9, blue: 0.6),
+    Color(red: 0.6, green: 0.85, blue: 0.95),
+    Color(red: 0.6, green: 0.7, blue: 0.95),
+    Color(red: 0.7, green: 0.6, blue: 0.95),
+    Color(red: 1.0, green: 0.7, blue: 0.8),
+    Color(red: 0.85, green: 0.6, blue: 0.95),
+    Color(red: 0.75, green: 0.7, blue: 0.65),
+    Color(red: 0.7, green: 0.7, blue: 0.7),
+    Color(red: 0.9, green: 0.85, blue: 0.85)
 ]
 
+let sampleHabits: [Habit] = {
+    let calendar = Calendar.current
+    let today = Date()
     
+    return [
+        Habit(
+            name: "Drink Water",
+            label: "💧",
+            progress: 32,
+            colorIndex: 4,
+            goal: 80,
+            unit: "oz",
+            startDate: today,
+            repeatRule: .daily,
+            isWeekly: false
+        ),
+        Habit(
+            name: "Workout",
+            label: "🏋️‍♂️",
+            progress: 1,
+            colorIndex: 1,
+            goal: 1,
+            unit: "session",
+            startDate: today,
+            repeatRule: .daily,
+            isWeekly: false
+        ),
+        Habit(
+            name: "Call Family",
+            label: "📞",
+            progress: 0,
+            colorIndex: 0,
+            goal: 1,
+            unit: "time",
+            startDate: today,
+            repeatRule: .weekdays,
+            isWeekly: false
+        ),
+        Habit(
+            name: "Weekly Review",
+            label: "📝",
+            progress: 0,
+            colorIndex: 3,
+            goal: 1,
+            unit: "time",
+            startDate: today,
+            repeatRule: .daily,
+            isWeekly: true
+        )
+    ]
+}()
