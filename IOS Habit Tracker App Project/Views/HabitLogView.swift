@@ -3,11 +3,13 @@ import Foundation
 
 struct HabitLogView: View {
     @Environment(\.calendar) private var calendar
+    @StateObject private var userViewModel = UserViewModel()
     @State private var selectedDate = Date()
     @State private var selectedHabitForLog: Habit?
     @State private var selectedHabitForEdit: Habit?
     @State private var showNewHabitSheet = false
-    @State private var habits = sampleHabits
+    
+    
     private let cardApproxHeight: CGFloat = 107
     private let maxVisibleDailyCards = 3
     private let maxVisibleWeeklyCards = 2
@@ -61,10 +63,11 @@ struct HabitLogView: View {
                                     selectedHabitForEdit = habit
                                 },
                                 onDelete: {
-                                    if let index = habits.firstIndex(where: { $0.id == habit.id }) {
-                                        habits.remove(at: index)
+                                    Task {
+                                        try? await userViewModel.deleteHabit(habit)
+                                        }
                                     }
-                                }
+                                
                             )
                         }
                     }
@@ -96,8 +99,8 @@ struct HabitLogView: View {
                                     selectedHabitForEdit = habit
                                 },
                                 onDelete: {
-                                    if let index = habits.firstIndex(where: { $0.id == habit.id }) {
-                                        habits.remove(at: index)
+                                    Task {
+                                        try? await userViewModel.deleteHabit(habit)
                                     }
                                 }
                             )
@@ -111,11 +114,14 @@ struct HabitLogView: View {
         }
         .frame(alignment: .topLeading)
         .padding(.horizontal, 16)
+        .task {
+            await userViewModel.fetchUser()
+        }
         // habit log sheet stuff
         .sheet(item: $selectedHabitForLog) { habit in
             HabitLogSheet(habit: habit) { newProgress in
-                if let index = habits.firstIndex(where: { $0.id == habit.id }) {
-                    habits[index].progress = newProgress
+                Task {
+                    try? await userViewModel.updateHabitProgress(habit, newProgress: newProgress)
                 }
             }
             .presentationDetents([.medium, .large])
@@ -125,8 +131,8 @@ struct HabitLogView: View {
         .sheet(item: $selectedHabitForEdit) { habit in
             NavigationStack {
                 EditHabitView(habit: habit) { updatedHabit in
-                    if let index = habits.firstIndex(where: { $0.id == updatedHabit.id }) {
-                        habits[index] = updatedHabit
+                    Task {
+                        try? await userViewModel.updateHabt(updatedHabit)
                     }
                 }
             }
@@ -134,7 +140,9 @@ struct HabitLogView: View {
         // new habit sheet stuff
         .sheet(isPresented: $showNewHabitSheet) {
             NewHabitView { newHabit in
-                habits.append(newHabit)
+                Task {
+                    try? await userViewModel.addHabit(newHabit)
+                }
                 selectedDate = Date() // Reset to today so you see the new habit
             }
         }
@@ -143,14 +151,14 @@ struct HabitLogView: View {
     // filtering
 
     private var dailyHabitsForSelectedDate: [Habit] {
-        habits.filter { habit in
+        userViewModel.habits.filter { habit in
             habit.occurs(on: selectedDate, calendar: calendar)
             && !habit.isWeekly
         }
     }
 
     private var weeklyHabitsForSelectedDate: [Habit] {
-        habits.filter { habit in
+        userViewModel.habits.filter { habit in
             guard habit.isWeekly else { return false }
             guard selectedDate >= calendar.startOfDay(for: habit.startDate) else {
                 return false

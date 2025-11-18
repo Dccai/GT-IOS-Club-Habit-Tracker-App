@@ -1,20 +1,65 @@
 import Foundation
 import SwiftUI
+import FirebaseFirestore
 
-enum HabitRepeat: Equatable {
+enum HabitRepeat: Codable, Equatable {
     case daily
     case weekdays
     case weekends
     case weekly
     case customWeekdays(Set<Weekday>)
+    
+    enum CodingKeys: String, CodingKey {
+        case type
+        case customDays
+    }
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self{
+        case .daily:
+            try container.encode("daily", forKey: .type)
+        case .weekdays:
+            try container.encode("weekdays", forKey: .type)
+        case .weekends:
+            try container.encode("weekends", forKey: .type)
+        case .weekly:
+            try container.encode("weekly", forKey: .type)
+        case .customWeekdays(let days):
+            try container.encode("customWeekdays", forKey: .type)
+            let daysArray = Array(days).map {$0.rawValue}
+            try container.encode(daysArray, forKey: .customDays)
+        }
+    }
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        switch type {
+        case "daily":
+            self = .daily
+        case "weekdays":
+            self = .weekdays
+        case "weekends":
+            self = .weekends
+        case "weekly":
+            self = .weekly
+        case "customWeekdays":
+            let daysArray = try container.decode([Int].self, forKey: .customDays)
+            let days = Set(daysArray.compactMap{Weekday(rawValue: $0)})
+            self = .customWeekdays(days)
+        default:
+            self = .daily
+        }
+        
+    }
 }
 
-enum Weekday: Int, CaseIterable, Hashable {
+enum Weekday: Int, CaseIterable, Hashable, Codable {
     case sunday = 1, monday, tuesday, wednesday, thursday, friday, saturday
 }
 
-struct Habit: Identifiable {
-    var id: UUID = UUID()
+struct Habit: Identifiable, Codable {
+    @DocumentID var id: String?
+    
     
     var name: String
     var label: String
@@ -26,6 +71,19 @@ struct Habit: Identifiable {
     var startDate: Date
     var repeatRule: HabitRepeat
     var isWeekly: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case label
+        case progress
+        case colorIndex
+        case goal
+        case unit
+        case startDate
+        case repeatRule
+        case isWeekly
+    }
 }
 
 extension Habit {

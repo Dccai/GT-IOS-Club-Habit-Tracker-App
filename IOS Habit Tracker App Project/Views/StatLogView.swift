@@ -10,7 +10,7 @@ struct StatLogView: View {
     @Environment(\.calendar) private var calendar
     @State private var selectedDate = Date()
     @State private var showNewHabitSheet = false
-    @State private var habits = sampleHabits
+    @StateObject private var userViewModel = UserViewModel()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -84,24 +84,29 @@ struct StatLogView: View {
         }
         .frame(alignment: .topLeading)
         .padding(.horizontal, 16)
+        .task{
+            await userViewModel.fetchUser()
+        }
         //new habit sheet stuff
         .sheet(isPresented: $showNewHabitSheet) {
             NewHabitView { newHabit in
-                habits.append(newHabit)
+                Task {
+                    try? await userViewModel.addHabit(newHabit)
+                }
                 selectedDate = Date()
             }
         }
     }
     
     private var dailyHabitsForSelectedDate: [Habit] {
-        habits.filter { habit in
+        userViewModel.habits.filter { habit in
             habit.occurs(on: selectedDate, calendar: calendar)
             && !habit.isWeekly
         }
     }
     
     private var weeklyHabitsForSelectedDate: [Habit] {
-        habits.filter { habit in
+        userViewModel.habits.filter { habit in
             guard habit.isWeekly else { return false }
             guard selectedDate >= calendar.startOfDay(for: habit.startDate) else {
                 return false
