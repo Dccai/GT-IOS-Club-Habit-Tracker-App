@@ -42,7 +42,7 @@ class UserViewModel: ObservableObject {
                 id:uid,
                 name: data["name"] as? String ?? "",
                 email: data["email"] as? String ?? "",
-                habits: []
+                
                 
             )
             self.isAuthenticated = true
@@ -102,7 +102,7 @@ class UserViewModel: ObservableObject {
             throw error
         }
     }
-    func updateHabt(_ habit: Habit) async throws {
+    func updateHabit(_ habit: Habit) async throws {
         guard let uid = user?.id else {
             throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey:"No user logged in"])
             

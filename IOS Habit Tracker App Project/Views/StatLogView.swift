@@ -10,7 +10,7 @@ struct StatLogView: View {
     @Environment(\.calendar) private var calendar
     @State private var selectedDate = Date()
     @State private var showNewHabitSheet = false
-    @StateObject private var userViewModel = UserViewModel()
+    @EnvironmentObject var userViewModel : UserViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -84,9 +84,6 @@ struct StatLogView: View {
         }
         .frame(alignment: .topLeading)
         .padding(.horizontal, 16)
-        .task{
-            await userViewModel.fetchUser()
-        }
         //new habit sheet stuff
         .sheet(isPresented: $showNewHabitSheet) {
             NewHabitView { newHabit in

@@ -3,7 +3,7 @@ import Foundation
 
 struct HabitLogView: View {
     @Environment(\.calendar) private var calendar
-    @StateObject private var userViewModel = UserViewModel()
+    @EnvironmentObject var userViewModel : UserViewModel
     @State private var selectedDate = Date()
     @State private var selectedHabitForLog: Habit?
     @State private var selectedHabitForEdit: Habit?
@@ -114,9 +114,6 @@ struct HabitLogView: View {
         }
         .frame(alignment: .topLeading)
         .padding(.horizontal, 16)
-        .task {
-            await userViewModel.fetchUser()
-        }
         // habit log sheet stuff
         .sheet(item: $selectedHabitForLog) { habit in
             HabitLogSheet(habit: habit) { newProgress in
@@ -132,7 +129,7 @@ struct HabitLogView: View {
             NavigationStack {
                 EditHabitView(habit: habit) { updatedHabit in
                     Task {
-                        try? await userViewModel.updateHabt(updatedHabit)
+                        try? await userViewModel.updateHabit(updatedHabit)
                     }
                 }
             }
