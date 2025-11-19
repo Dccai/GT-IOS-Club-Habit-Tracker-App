@@ -29,10 +29,13 @@ struct HabitLogView: View {
                 .buttonStyle(.plain)
                 .padding(.bottom, 14)
             }
-
-            Text("Habits")
-                .font(.system(size: 34, weight: .bold))
-
+            HStack(alignment: .firstTextBaseline, spacing: 8){
+                Text("Habits")
+                    .font(.system(size: 34, weight: .bold))
+                Text(selectedDate.formatted(.dateTime.month(.wide).year()))
+                    .font(.system(size: 17,weight: .regular))
+                    .foregroundStyle(.secondary)
+            }
             DateSelector(selectedDate: $selectedDate)
                 .padding(.horizontal, -16)
 

@@ -197,6 +197,7 @@ struct EditHabitView: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     repeatOption = option
+                    isWeekly = (option == .weekly)
                     if option == .custom {
                         showCustomDaysSheet = true
                     }
