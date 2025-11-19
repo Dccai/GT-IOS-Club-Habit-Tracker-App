@@ -20,10 +20,13 @@ struct ContentView: View {
                         switch selectedTab {
                         case .habits:
                             HabitLogView()
+                                .environmentObject(userViewModel)
                         case .stats:
                             StatLogView()
+                                .environmentObject(userViewModel)
                         case .profile:
                             ProfileView()
+                                .environmentObject(userViewModel)
                         }
                     }
                     
